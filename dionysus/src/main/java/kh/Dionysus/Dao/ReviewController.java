@@ -1,31 +1,29 @@
 package kh.Dionysus.Dao;
-
 import kh.Dionysus.Dto.AlcoholTotalDto;
 import kh.Dionysus.Utills.Common;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
-public class PopularListDao {
+public class ReviewController {
     private Connection conn = null;
     private Statement stmt = null;
     private ResultSet rs = null;
     private PreparedStatement pStmt = null;
-    public List<AlcoholTotalDto> popularSelect(String tag) throws SQLException {
+    public List<AlcoholTotalDto> alcoholSelect(String alcohol) throws SQLException {
         List<AlcoholTotalDto> list = new ArrayList<>();
-        String sql = "SELECT a.ALCOHOL_NAME, a.CATEGORY, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE, a.TAG, " +
+        String sql = "SELECT a.ALCOHOL_NAME, a.CATEGORY, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE, " +
                 "j.JJIM, r.REVIEW, s.SCORE " +
                 "FROM ALCOHOL_TB a " +
                 "LEFT JOIN REVIEW_TB r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME " +
                 "LEFT JOIN SCORE_TB s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME " +
                 "LEFT JOIN JJIM_TB j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME " +
-                "WHERE a.TAG LIKE ?";
+                "WHERE a.CATEGORY = ?";
 
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, "%" + tag + "%");
+            pStmt.setString(1, alcohol);
             rs = pStmt.executeQuery();
             while (rs.next()) {
                 AlcoholTotalDto vo = new AlcoholTotalDto();
@@ -41,8 +39,6 @@ public class PopularListDao {
                 vo.setReview(rs.getString("REVIEW"));
                 vo.setScore(rs.getInt("SCORE"));
                 list.add(vo);
-
-
             }
         } catch (Exception e) {
             e.printStackTrace();

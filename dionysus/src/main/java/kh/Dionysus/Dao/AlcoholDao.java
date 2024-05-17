@@ -45,6 +45,10 @@ public class AlcoholDao {
           } catch (Exception e) {
             e.printStackTrace();
         }
+        Common.close(rs);
+        Common.close(stmt);
+        Common.close(conn);
+        Common.close(pStmt);
         return list;
     }
 }

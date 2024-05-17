@@ -65,7 +65,6 @@ public class UserController {
     // POST : 회원 가입
     @PostMapping("/signup")
     public ResponseEntity<Boolean> memberRegister(@RequestBody MemberDto GenerateUser) {
-
         UserDAO dao = new UserDAO();
         boolean isTrue = dao.userRegister(GenerateUser);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
