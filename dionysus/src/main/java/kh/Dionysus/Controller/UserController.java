@@ -26,12 +26,12 @@ public class UserController {
     // POST : 로그인
     @PostMapping("/login")
     public ResponseEntity<List<MemberDto>> memberLogin(@RequestBody Map<String, String> loginData) {
-        String user = loginData.get("id");
-        String pw = loginData.get("pw");
-        System.out.println("ID : " + user);
-        System.out.println("PD : " + pw);
+        String id = loginData.get("USER_ID");
+        String pw = loginData.get("USER_PW");
+        System.out.println("INPUT_ID : " + id);
+        System.out.println("INPUT_PD : " + pw);
         UserDAO dao = new UserDAO();
-        List<MemberDto> result = dao.regMemberCheck(user, pw);
+        List<MemberDto> result = dao.loginUserCheck(id, pw);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

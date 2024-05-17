@@ -45,10 +45,10 @@ public class UserDAO {
             rs = stmt.executeQuery(sql);
 
             while(rs.next()) { // 읽은 데이타가 있으면 true
-                String sqlId = rs.getString("ID"); // 쿼리문 수행 결과에서 ID값을 가져 옴
-                String sqlPw = rs.getString("PW");
+                String sqlId = rs.getString("USER_ID"); // 쿼리문 수행 결과에서 ID값을 가져 옴
+                String sqlPw = rs.getString("USER_PW");
                 System.out.println("ID : " + sqlId);
-                System.out.println("PWD : " + sqlPw);
+                System.out.println("PD : " + sqlPw);
                 if(id.equals(sqlId) && pw.equals(sqlPw)) {
                     Common.close(rs);
                     Common.close(stmt);
@@ -56,11 +56,13 @@ public class UserDAO {
                     return true;
                 }
             }
+
+        } catch(Exception e) {
+            e.printStackTrace();
+        } finally {
             Common.close(rs);
             Common.close(stmt);
             Common.close(conn);
-        } catch(Exception e) {
-            e.printStackTrace();
         }
         return false;
     }
@@ -106,7 +108,7 @@ public class UserDAO {
     // 로그인 단계
     // 1. 프론트로부터 받은 아이디 비번을 DB 정보와 조회
     // 2. 있는 것으로 확인 되면 아이디 비번을 다시 반환해주기
-    public List<MemberDto> regMemberCheck(String id, String pw) {
+    public List<MemberDto> loginUserCheck(String USER_ID, String USER_PW) {
         List<MemberDto> loginResult = new ArrayList<>();
         boolean isNotReg = false;
         String user_id = null;
@@ -114,14 +116,14 @@ public class UserDAO {
         try {
             conn = Common.getConnection();
             stmt = conn.createStatement();
-            String sql = "SELECT USER_ID, USER_PW FROM MEMBER_TB WHERE USER_ID = " + "'" + id +"' AND USER_PW = "+ "'"+pw+"'";
+            String sql = "SELECT USER_ID, USER_PW FROM MEMBER_TB WHERE USER_ID = " + "'" + USER_ID +"' AND USER_PW = "+ "'"+USER_PW+"'";
             rs = stmt.executeQuery(sql);
             if(rs.next()) {
                 user_id = rs.getString("USER_ID");
                 user_pw = rs.getString("USER_PW");
                 MemberDto dto = new MemberDto();
-                dto.setUser_id(id);
-                dto.setUser_pw(pw);
+                dto.setUser_id(user_id);
+                dto.setUser_pw(user_pw);
                 loginResult.add(dto);
                 isNotReg = false;
             }
