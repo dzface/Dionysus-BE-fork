@@ -1,4 +1,4 @@
-package kh.Dto;
+package kh.Dionysus.Dto;
 
 
 import lombok.Getter;
