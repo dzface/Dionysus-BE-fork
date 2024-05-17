@@ -9,5 +9,5 @@ import lombok.Setter;
 public class ScoreDto {
     private String user_id;
     private String alcohol_name;
-    private String score;
+    private int score;
 }
