@@ -1,7 +1,7 @@
 package kh.Dionysus.Controller;
 
 import kh.Dionysus.Dao.UserDAO;
-import kh.Dionysus.Dto.MemberDto;
+import kh.Dionysus.Dto.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,22 +16,33 @@ import java.util.Map;
 @Slf4j //롬복내장 디버깅 어노테이션
 public class UserController {
     @GetMapping("/search-user")
-    public ResponseEntity<List<MemberDto>> memberList(@RequestParam String name) {
+    public ResponseEntity<List<UserDto>> memberList(@RequestParam String name) {
         System.out.println("NAME : " + name);
         UserDAO dao = new UserDAO();
-        List<MemberDto> list = dao.memberSelect(name);
+        List<UserDto> list = dao.memberSelect(name);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
 
     // POST : 로그인
     @PostMapping("/login")
-    public ResponseEntity<List<MemberDto>> memberLogin(@RequestBody Map<String, String> loginData) {
+    public ResponseEntity<List<UserDto>> memberLogin(@RequestBody Map<String, String> loginData) {
+        // 디버깅: loginData에 올바른 키가 있는지 확인
+        if (!loginData.containsKey("USER_ID") || !loginData.containsKey("USER_PW")) {
+            System.err.println("Request data does not contain USER_ID or USER_PW.");
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         String id = loginData.get("USER_ID");
         String pw = loginData.get("USER_PW");
         System.out.println("INPUT_ID : " + id);
-        System.out.println("INPUT_PD : " + pw);
+        System.out.println("INPUT_PW : " + pw);
         UserDAO dao = new UserDAO();
-        List<MemberDto> result = dao.loginUserCheck(id, pw);
+        List<UserDto> result = dao.loginUserCheck(id, pw);
+
+        // 디버깅: 결과 확인
+        if (result == null || result.isEmpty()) {
+            System.err.println("Login result is Nodata or NULL.");
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -64,7 +75,7 @@ public class UserController {
     }
     // POST : 회원 가입
     @PostMapping("/signup")
-    public ResponseEntity<Boolean> memberRegister(@RequestBody MemberDto GenerateUser) {
+    public ResponseEntity<Boolean> userRegister(@RequestBody UserDto GenerateUser) {
 
         UserDAO dao = new UserDAO();
         boolean isTrue = dao.userRegister(GenerateUser);

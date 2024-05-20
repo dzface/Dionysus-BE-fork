@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MemberDto {
+public class UserDto {
     private String user_pw;
     private String user_id;
     private String user_name;

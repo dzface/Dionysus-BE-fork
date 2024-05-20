@@ -1,7 +1,7 @@
 package kh.Dionysus.Dao;
 
 
-import kh.Dionysus.Dto.MemberDto;
+import kh.Dionysus.Dto.UserDto;
 import kh.Dionysus.Utills.Common;
 
 import java.sql.Connection;
@@ -68,8 +68,8 @@ public class UserDAO {
     }
 
     // 회원정보 조회
-    public List<MemberDto> memberSelect(String getName) {
-        List<MemberDto> list = new ArrayList<>();
+    public List<UserDto> memberSelect(String getName) {
+        List<UserDto> list = new ArrayList<>();
         String sql = null;
         System.out.println("NAME : " + getName);
         try {
@@ -87,7 +87,7 @@ public class UserDAO {
                 String nick = rs.getString("USER_NICK");
                 String phone = rs.getString("USER_PHONE");
                 String address = rs.getString("USER_ADDRESS");
-                MemberDto dto = new MemberDto();
+                UserDto dto = new UserDto();
                 dto.setUser_id(id);
                 dto.setUser_pw(pw);
                 dto.setUser_name(name);
@@ -102,26 +102,33 @@ public class UserDAO {
             Common.close(conn);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }finally {
+            Common.close(rs);
+            Common.close(pStmt);
+            Common.close(conn);
+        };
         return list;
     }
     // 로그인 단계
     // 1. 프론트로부터 받은 아이디 비번을 DB 정보와 조회
     // 2. 있는 것으로 확인 되면 아이디 비번을 다시 반환해주기
-    public List<MemberDto> loginUserCheck(String USER_ID, String USER_PW) {
-        List<MemberDto> loginResult = new ArrayList<>();
+    public List<UserDto> loginUserCheck(String USER_ID, String USER_PW) {
+        List<UserDto> loginResult = new ArrayList<>();
         boolean isNotReg = false;
-        String user_id = null;
-        String user_pw = null;
+        Connection conn = null;
+        PreparedStatement pStmt = null;
+        ResultSet rs = null;
         try {
+            String sql = "SELECT USER_ID, USER_PW FROM MEMBER_TB WHERE USER_ID = ? AND USER_PW = ? ";
             conn = Common.getConnection();
-            stmt = conn.createStatement();
-            String sql = "SELECT USER_ID, USER_PW FROM MEMBER_TB WHERE USER_ID = " + "'" + USER_ID +"' AND USER_PW = "+ "'"+USER_PW+"'";
-            rs = stmt.executeQuery(sql);
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, USER_ID);
+            pStmt.setString(2, USER_PW);
+            rs = pStmt.executeQuery();
             if(rs.next()) {
-                user_id = rs.getString("USER_ID");
-                user_pw = rs.getString("USER_PW");
-                MemberDto dto = new MemberDto();
+                String user_id = rs.getString("USER_ID");
+                String user_pw = rs.getString("USER_PW");
+                UserDto dto = new UserDto();
                 dto.setUser_id(user_id);
                 dto.setUser_pw(user_pw);
                 loginResult.add(dto);
@@ -129,10 +136,11 @@ public class UserDAO {
             }
         } catch(Exception e) {
             e.printStackTrace();
+        }finally {
+            Common.close(rs);
+            Common.close(pStmt);
+            Common.close(conn);
         }
-        Common.close(rs);
-        Common.close(stmt);
-        Common.close(conn);
         return loginResult;
     }
     //아이디 찾기
@@ -192,7 +200,7 @@ public class UserDAO {
         return user_pw;
     }
     // 회원 가입
-    public boolean userRegister(MemberDto user) {
+    public boolean userRegister(UserDto user) {
         int result = 0;
         String sql = "INSERT INTO MEMBER_TB(USER_ID, USER_PW, USER_NAME, USER_JUMIN, USER_NICK, USER_PHONE, USER_ADDRESS) VALUES(?, ?, ?, ?, ?, ?, ?)";
         try {
