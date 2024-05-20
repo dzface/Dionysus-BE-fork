@@ -1,7 +1,7 @@
 package kh.Dionysus.Dao;
 
 
-import kh.Dionysus.Dto.MemberDto;
+import kh.Dionysus.Dto.UserDto;
 import kh.Dionysus.Utills.Common;
 
 
@@ -17,8 +17,8 @@ public class MemberUpdateDao {
     private PreparedStatement pSmt = null;
 
     // 회원 정보 조회
-    public MemberDto memberSelect(String userid) {
-        MemberDto dto = new MemberDto();
+    public UserDto memberSelect(String userid) {
+        UserDto dto = new UserDto();
         String sql = null;
         try {
             conn = Common.getConnection();
@@ -54,7 +54,7 @@ public class MemberUpdateDao {
     }
 
     // 회원 정보 수정
-    public Boolean memberUpdate(MemberDto dto) {
+    public Boolean memberUpdate(UserDto dto) {
         int result = 0;
         String sql = "UPDATE MEMBER_TB SET user_pw = ?,user_name=?," +
                 "user_nick=?,user_phone=?,user_address=? WHERE user_id=?";

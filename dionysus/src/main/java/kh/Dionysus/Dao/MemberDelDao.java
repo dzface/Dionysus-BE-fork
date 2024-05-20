@@ -1,6 +1,6 @@
 package kh.Dionysus.Dao;
 
-import kh.Dionysus.Dto.MemberDto;
+import kh.Dionysus.Dto.UserDto;
 import kh.Dionysus.Utills.Common;
 
 import java.sql.Connection;
@@ -13,7 +13,7 @@ public class MemberDelDao {
     private PreparedStatement pStmt = null;
 
     // 회원 정보 있는지 확인
-    public boolean MemberCheck(MemberDto Dto) {
+    public boolean MemberCheck(UserDto Dto) {
         boolean isNotReg = false;
         String sql = "SELECT * FROM MEMBER_TB WHERE USER_NAME = ? AND USER_JUMIN = ?";
         try {

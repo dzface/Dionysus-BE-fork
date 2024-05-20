@@ -15,9 +15,9 @@ import java.util.List;
 public class AlcoholController {
     //처음에 category로 들어가면 화면에 띄워주는 리스트
     @GetMapping("/selectalcohol")
-    public ResponseEntity<List<AlcoholTotalDto>> selectAlcohol(@RequestParam String name) throws SQLException {
+    public ResponseEntity<List<AlcoholTotalDto>> selectAlcohol(@RequestParam String category) throws SQLException {
         AlcoholDao dao = new AlcoholDao();
-        List<AlcoholTotalDto> AlcoholList = dao.alcoholSelect(name);
+        List<AlcoholTotalDto> AlcoholList = dao.alcoholSelect(category);
         return new ResponseEntity<>(AlcoholList, HttpStatus.OK);
     }
 
