@@ -17,12 +17,8 @@ public class AlcoholDao {
         try {
             conn = Common.getConnection();
             if (category.equals("all")) {
-                String basesql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE, " +
-                        "j.JJIM, r.REVIEW, s.SCORE " +
-                        "FROM ALCOHOL_TB a " +
-                        "LEFT JOIN REVIEW_TB r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME " +
-                        "LEFT JOIN SCORE_TB s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME " +
-                        "LEFT JOIN JJIM_TB j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME ";
+                String basesql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE " +
+                        "FROM ALCOHOL_TB a";
                 String orderByClause = "";
                 if (sortBy != null && !sortBy.isEmpty()) {
                     switch (sortBy) {
@@ -42,13 +38,8 @@ public class AlcoholDao {
                 String sql = basesql + orderByClause;
                 pStmt = conn.prepareStatement(sql);
             } else {
-                String basesql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE, " +
-                        "j.JJIM, r.REVIEW, s.SCORE " +
-                        "FROM ALCOHOL_TB a " +
-                        "LEFT JOIN REVIEW_TB r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME " +
-                        "LEFT JOIN SCORE_TB s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME " +
-                        "LEFT JOIN JJIM_TB j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME " +
-                        "WHERE a.CATEGORY = ?";
+                String basesql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE " +
+                        "FROM ALCOHOL_TB a " + "WHERE a.CATEGORY = ?";
                 String orderByClause = "";
                 if (sortBy != null && !sortBy.isEmpty()) {
                     switch (sortBy) {
@@ -78,9 +69,6 @@ public class AlcoholDao {
                 vo.setAbv(rs.getInt("ABV"));
                 vo.setVolume(rs.getInt("VOLUME"));
                 vo.setPrice(rs.getInt("PRICE"));
-                vo.setJjim(rs.getBoolean("JJIM"));
-                vo.setReview(rs.getString("REVIEW"));
-                vo.setScore(rs.getInt("SCORE"));
                 list.add(vo);
             }
           } catch (Exception e) {

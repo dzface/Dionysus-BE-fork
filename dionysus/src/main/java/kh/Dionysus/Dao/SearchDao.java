@@ -17,18 +17,23 @@ public class SearchDao {
 
     public List<AlcoholTotalDto> alcoholSearch(String category,String keyword) throws SQLException {
         List<AlcoholTotalDto> search = new ArrayList<>();
-        String sql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE, " +
-                "j.JJIM, r.REVIEW, s.SCORE " +
-                "FROM ALCOHOL_TB a " +
-                "LEFT JOIN REVIEW_TB r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME " +
-                "LEFT JOIN SCORE_TB s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME " +
-                "LEFT JOIN JJIM_TB j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME " +
-                "WHERE a.CATEGORY = ? AND a.ALCOHOL_NAME LIKE ?";
-        try {
-            conn = Common.getConnection();
+        try{
+        conn = Common.getConnection();
+        if (category.equals("all")) {
+            String sql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE "+
+                    "FROM ALCOHOL_TB a " +
+                    "WHERE a.ALCOHOL_NAME LIKE ?";
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, "%" + keyword + "%");
+        } else {
+            String sql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE "+
+                    "FROM ALCOHOL_TB a " +
+                    "WHERE a.CATEGORY = ? AND a.ALCOHOL_NAME LIKE ?";
+
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, category);
             pStmt.setString(2, "%" + keyword + "%");
+        }
             rs = pStmt.executeQuery();
             while (rs.next()) {
                 AlcoholTotalDto vo = new AlcoholTotalDto();
@@ -38,13 +43,15 @@ public class SearchDao {
                 vo.setAbv(rs.getInt("ABV"));
                 vo.setVolume(rs.getInt("VOLUME"));
                 vo.setPrice(rs.getInt("PRICE"));
-                vo.setJjim(rs.getBoolean("JJIM"));
-                vo.setReview(rs.getString("REVIEW"));
-                vo.setScore(rs.getInt("SCORE"));
                 search.add(vo);
             }
+
         } catch (Exception e) {
             e.printStackTrace();
+        }finally {
+            Common.close(rs);
+            Common.close(pStmt);
+            Common.close(conn);
         }
         return search;
     }
