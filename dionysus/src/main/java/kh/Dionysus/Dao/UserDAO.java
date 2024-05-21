@@ -21,19 +21,41 @@ public class UserDAO {
     // 회원 가입 여부 확인
     public boolean regMemberCheck(String id) {
         boolean isNotReg = false;
-        try {
-            conn = Common.getConnection();
-            stmt = conn.createStatement();
-            String sql = "SELECT * FROM MEMBER_TB WHERE USER_ID = " + "'" + id +"'";
-            rs = stmt.executeQuery(sql);
-            if(rs.next()) isNotReg = false;
-            else isNotReg = true;
-        } catch(Exception e) {
+        String sql = "SELECT * FROM MEMBER_TB WHERE USER_ID = ?";
+        try (Connection conn = Common.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, id);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    isNotReg = false; // 가입되어 있음
+                } else {
+                    isNotReg = true;  // 가입되어 있지 않음
+                }
+            }
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        Common.close(rs);
-        Common.close(stmt);
-        Common.close(conn);
+        return isNotReg; // 가입 되어 있으면 false, 가입이 안되어 있으면 true
+    }
+    // 주민번호유효성 확인
+    public boolean juminCheck(String USER_JUMIN) {
+        boolean isNotReg = false;
+        String sql = "SELECT * FROM MEMBER_TB WHERE USER_JUMIN = ?";
+        try (Connection conn = Common.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, USER_JUMIN);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    isNotReg = false; // 가입되어 있음
+                    System.out.println("주민등록번호가 이미 존재합니다.");
+                } else {
+                    isNotReg = true;  // 가입되어 있지 않음
+                    System.out.println("주민등록번호가 존재하지 않습니다.");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return isNotReg; // 가입 되어 있으면 false, 가입이 안되어 있으면 true
     }
     // 로그인 체크
@@ -47,6 +69,7 @@ public class UserDAO {
             while(rs.next()) { // 읽은 데이타가 있으면 true
                 String sqlId = rs.getString("USER_ID"); // 쿼리문 수행 결과에서 ID값을 가져 옴
                 String sqlPw = rs.getString("USER_PW");
+                String sqlName = rs.getString("USER_USER_NAME");
                 System.out.println("ID : " + sqlId);
                 System.out.println("PD : " + sqlPw);
                 if(id.equals(sqlId) && pw.equals(sqlPw)) {
@@ -119,7 +142,7 @@ public class UserDAO {
         PreparedStatement pStmt = null;
         ResultSet rs = null;
         try {
-            String sql = "SELECT USER_ID, USER_PW FROM MEMBER_TB WHERE USER_ID = ? AND USER_PW = ? ";
+            String sql = "SELECT * FROM MEMBER_TB WHERE USER_ID = ? AND USER_PW = ? "; // 모든 회원정보 조회
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, USER_ID);
@@ -128,9 +151,19 @@ public class UserDAO {
             if(rs.next()) {
                 String user_id = rs.getString("USER_ID");
                 String user_pw = rs.getString("USER_PW");
+                String user_name = rs.getString("USER_NAME");
+                String user_jumin = rs.getString("USER_JUMIN");
+                String user_nick = rs.getString("USER_NICK");
+                String user_phone = rs.getString("USER_PHONE");
+                String user_address = rs.getString("USER_ADDRESS");
                 UserDto dto = new UserDto();
                 dto.setUser_id(user_id);
                 dto.setUser_pw(user_pw);
+                dto.setUser_name(user_name);
+                dto.setUser_jumin(user_jumin);
+                dto.setUser_nick(user_nick);
+                dto.setUser_phone(user_phone);
+                dto.setUser_address(user_address);
                 loginResult.add(dto);
                 isNotReg = false;
             }

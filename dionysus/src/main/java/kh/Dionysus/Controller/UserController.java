@@ -48,10 +48,17 @@ public class UserController {
 
     // GET : 가입 여부 확인
     @GetMapping("/check")
-    public ResponseEntity<Boolean> memberCheck(@RequestParam String id) {
-        System.out.println("회원 가입 여부 확인 ID : " + id);
+    public ResponseEntity<Boolean> memberCheck(@RequestParam String USER_ID) {
+        System.out.println("회원 가입 여부 확인 ID : " + USER_ID);
         UserDAO dao = new UserDAO();
-        boolean isTrue = dao.regMemberCheck(id);
+        boolean isTrue = dao.regMemberCheck(USER_ID);
+        return new ResponseEntity<>(isTrue, HttpStatus.OK);
+    }
+    @GetMapping("/jumin-check")
+    public ResponseEntity<Boolean> juminCheck(@RequestParam String USER_JUMIN) {
+        System.out.println("주민번호 확인로그 : " + USER_JUMIN);
+        UserDAO dao = new UserDAO();
+        boolean isTrue = dao.juminCheck(USER_JUMIN);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
     // GET : 이름 주민번호 받아서 아이디 조회
