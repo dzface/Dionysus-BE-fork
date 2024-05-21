@@ -1,5 +1,6 @@
 package kh.Dionysus.Dao;
 
+import kh.Dionysus.Dto.JjimDto;
 import kh.Dionysus.Dto.MypageDto;
 import kh.Dionysus.Utills.Common;
 
@@ -102,5 +103,44 @@ public class JjimDao {
             Common.close(conn);
         }
         return list;
+    }
+    public List<JjimDto> jjimSelect2(String user_id) throws SQLException {
+        List<JjimDto> list = new ArrayList<>();
+        String sql = "SELECT * FROM JJIM_TB WHERE USER_ID = ?";
+
+        try {
+            conn = Common.getConnection();
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, user_id);
+            rs = pStmt.executeQuery();
+            while (rs.next()) {
+                JjimDto vo = new JjimDto();
+                vo.setUser_id(rs.getString("USER_ID"));
+                vo.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
+                vo.setJjim(rs.getBoolean("JJIM"));
+                list.add(vo);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        Common.close(rs);
+        Common.close(pStmt);
+        Common.close(conn);
+        return list;
+    }
+
+    public boolean jjimUpdate(JjimDto dto) throws SQLException {
+        String sql = "UPDATE JJIM_TB SET JJIM = ? WHERE USER_ID = ? AND ALCOHOL_NAME = ?";
+        try {
+            conn = Common.getConnection();
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setBoolean(1, dto.isJjim());
+            pStmt.setString(2, dto.getUser_id());
+            pStmt.setString(3, dto.getAlcohol_name());
+            if(pStmt.executeUpdate() > 0) return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }
