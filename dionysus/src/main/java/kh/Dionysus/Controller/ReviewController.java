@@ -14,9 +14,9 @@ import java.util.List;
 @RequestMapping("/review")
 public class ReviewController {
     @GetMapping("/selectreview")
-    public ResponseEntity<List<ReviewDto>> selectReview(@RequestParam String alcohol_name) throws SQLException {
+    public ResponseEntity<List<ReviewDto>> selectReview() throws SQLException {
         ReviewDao dao = new ReviewDao();
-        List<ReviewDto> reviewList = dao.reviewSelect2(alcohol_name);
+        List<ReviewDto> reviewList = dao.reviewSelect2();
         return new ResponseEntity<>(reviewList, HttpStatus.OK);
     }
 

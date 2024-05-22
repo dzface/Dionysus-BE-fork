@@ -85,14 +85,28 @@ public class ReviewDao {
         }
         return list;
     }
-    public List<ReviewDto> reviewSelect2(String alcohol_name) throws SQLException {
+    public List<ReviewDto> reviewSelect2() throws SQLException {
         List<ReviewDto> list = new ArrayList<>();
-        String sql = "SELECT * FROM REVIEW_TB WHERE ALCOHOL_NAME = ?";
-
+        String sql = "WITH RankedReviews AS (\n" +
+                "    SELECT\n" +
+                "        USER_ID,\n" +
+                "        ALCOHOL_NAME,\n" +
+                "        REVIEW,\n" +
+                "        ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                "    FROM\n" +
+                "        REVIEW_TB\n" +
+                ")\n" +
+                "SELECT\n" +
+                "    USER_ID,\n" +
+                "    ALCOHOL_NAME,\n" +
+                "    REVIEW\n" +
+                "FROM\n" +
+                "    RankedReviews\n" +
+                "WHERE\n" +
+                "    rn = 1;";
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, alcohol_name);
             rs = pStmt.executeQuery();
             while (rs.next()) {
                 ReviewDto vo = new ReviewDto();
@@ -105,9 +119,8 @@ public class ReviewDao {
             e.printStackTrace();
         }
         Common.close(rs);
-        Common.close(stmt);
-        Common.close(conn);
         Common.close(pStmt);
+        Common.close(conn);
         return list;
     }
     public boolean reviewInsert(ReviewDto dto) throws SQLException {

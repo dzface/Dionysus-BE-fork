@@ -17,8 +17,26 @@ public class AlcoholDao {
         try {
             conn = Common.getConnection();
             if (category.equals("all")) {
-                String basesql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE " +
-                        "FROM ALCOHOL_TB a";
+                String basesql = "WITH RankedReviews AS (\n" +
+                        "    SELECT\n" +
+                        "        USER_ID,\n" +
+                        "        ALCOHOL_NAME,\n" +
+                        "        REVIEW,\n" +
+                        "        ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                        "    FROM\n" +
+                        "        REVIEW_TB\n" +
+                        ")\n" +
+                        "SELECT\n" +
+                        "    a.ALCOHOL_NAME,\n" +
+                        "    a.COUNTRY_OF_ORIGIN,\n" +
+                        "    a.COM,\n" +
+                        "    a.ABV,\n" +
+                        "    a.VOLUME,\n" +
+                        "    a.PRICE,\n" +
+                        "    r.REVIEW\n" +
+                        "FROM\n" +
+                        "    ALCOHOL_TB a\n" +
+                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n";
                 String orderByClause = "";
                 if (sortBy != null && !sortBy.isEmpty()) {
                     switch (sortBy) {
@@ -38,8 +56,28 @@ public class AlcoholDao {
                 String sql = basesql + orderByClause;
                 pStmt = conn.prepareStatement(sql);
             } else {
-                String basesql = "SELECT a.ALCOHOL_NAME, a.COUNTRY_OF_ORIGIN, a.COM, a.ABV, a.VOLUME, a.PRICE " +
-                        "FROM ALCOHOL_TB a " + "WHERE a.CATEGORY = ?";
+                String basesql = "WITH RankedReviews AS (\n" +
+                        "    SELECT\n" +
+                        "        USER_ID,\n" +
+                        "        ALCOHOL_NAME,\n" +
+                        "        REVIEW,\n" +
+                        "        ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                        "    FROM\n" +
+                        "        REVIEW_TB\n" +
+                        ")\n" +
+                        "SELECT\n" +
+                        "    a.ALCOHOL_NAME,\n" +
+                        "    a.COUNTRY_OF_ORIGIN,\n" +
+                        "    a.COM,\n" +
+                        "    a.ABV,\n" +
+                        "    a.VOLUME,\n" +
+                        "    a.PRICE,\n" +
+                        "    r.REVIEW\n" +
+                        "FROM\n" +
+                        "    ALCOHOL_TB a\n" +
+                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                        "WHERE\n" +
+                        "    a.CATEGORY = ?";
                 String orderByClause = "";
                 if (sortBy != null && !sortBy.isEmpty()) {
                     switch (sortBy) {
@@ -69,6 +107,7 @@ public class AlcoholDao {
                 vo.setAbv(rs.getInt("ABV"));
                 vo.setVolume(rs.getInt("VOLUME"));
                 vo.setPrice(rs.getInt("PRICE"));
+                vo.setReview(rs.getString("REVIEW"));
                 list.add(vo);
             }
           } catch (Exception e) {
