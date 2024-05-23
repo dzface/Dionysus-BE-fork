@@ -4,11 +4,9 @@ package kh.Dionysus.Dao;
 import kh.Dionysus.Dto.UserDto;
 import kh.Dionysus.Utills.Common;
 
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MemberUpdateDao {
     private Connection conn = null;
@@ -17,38 +15,29 @@ public class MemberUpdateDao {
     private PreparedStatement pSmt = null;
 
     // 회원 정보 조회
-    public UserDto memberSelect(String userid) {
+    public UserDto memberSelect(String user_id) {
         UserDto dto = new UserDto();
-        String sql = null;
+        String sql = "SELECT * FROM MEMBER_TB WHERE USER_ID = ? ";
         try {
             conn = Common.getConnection();
-            stmt = conn.createStatement();
-            sql = "SELECT * FROM MEMBER_TB WHERE USER_ID = " + "'" + userid + "'";
-            rs = stmt.executeQuery(sql);
-
-            while(rs.next()) {
-                String id = rs.getString("USER_ID");
-                String pwd = rs.getString("USER_PW");
-                String name = rs.getString("USER_NAME");
-                String jumin = rs.getString("USER_JUMIN");
-                String nick = rs.getString("USER_NICK");
-                String phone = rs.getString("USER_PHONE");
-                String addr = rs.getString("USER_ADDRESS");
-
-                dto.setUser_id(id);
-                dto.setUser_pw(pwd);
-                dto.setUser_name(name);
-                dto.setUser_jumin(jumin);
-                dto.setUser_nick(nick);
-                dto.setUser_phone(phone);
-                dto.setUser_address(addr);
-
+            pSmt = conn.prepareStatement(sql);
+            pSmt.setString(1, user_id);
+            rs = pSmt.executeQuery();
+            while (rs.next()) {
+                dto.setUser_id(rs.getString("USER_ID"));
+                dto.setUser_pw(rs.getString("USER_PW"));
+                dto.setUser_name(rs.getString("USER_NAME"));
+                dto.setUser_jumin(rs.getString("USER_JUMIN"));
+                dto.setUser_nick(rs.getString("USER_NICK"));
+                dto.setUser_phone(rs.getString("USER_PHONE"));
+                dto.setUser_address(rs.getString("USER_ADDRESS"));
             }
-            Common.close(rs);
-            Common.close(stmt);
-            Common.close(conn);
-        } catch (Exception e) {
+        } catch (SQLException e) {
             e.printStackTrace();
+        } finally {
+            Common.close(rs);
+            Common.close(pSmt);
+            Common.close(conn);
         }
         return dto;
     }

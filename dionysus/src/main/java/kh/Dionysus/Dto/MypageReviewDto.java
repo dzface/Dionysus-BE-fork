@@ -5,17 +5,13 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MypageDto {
+public class MypageReviewDto {
     private String user_id;
     private String alcohol_name;
-    private String category;
     private String country_of_origin;
     private String com;
     private int abv;
     private int volume;
     private int price;
-    private String tag;
-    private boolean jjim;
     private String review;
-    private String score;
 }
