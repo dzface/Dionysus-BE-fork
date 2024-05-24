@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/search")
 public class SearchController {
-
+    // 사용함.
     @GetMapping("/selectsearch")
     public ResponseEntity<List<AlcoholTotalDto>> selectSearch(@RequestParam String category,@RequestParam String searchTerm) throws SQLException {
             SearchDao dao = new SearchDao();

@@ -26,17 +26,42 @@ public class AlcoholDao {
                         "    FROM\n" +
                         "        REVIEW_TB\n" +
                         ")\n" +
-                        "SELECT\n" +
-                        "    a.ALCOHOL_NAME,\n" +
-                        "    a.COUNTRY_OF_ORIGIN,\n" +
-                        "    a.COM,\n" +
-                        "    a.ABV,\n" +
-                        "    a.VOLUME,\n" +
-                        "    a.PRICE,\n" +
-                        "    r.REVIEW\n" +
-                        "FROM\n" +
-                        "    ALCOHOL_TB a\n" +
-                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n";
+                        "SELECT *\n" +
+                        "FROM (\n" +
+                        "    SELECT\n" +
+                        "        a.ALCOHOL_NAME,\n" +
+                        "        a.COUNTRY_OF_ORIGIN,\n" +
+                        "        a.COM,\n" +
+                        "        a.ABV,\n" +
+                        "        a.VOLUME,\n" +
+                        "        a.PRICE,\n" +
+                        "        r.REVIEW,\n" +
+                        "        s.SCORE,\n" +
+                        "        j.USER_ID AS JJIM_USER_ID,\n" +
+                        "        j.JJIM,\n" +
+                        "        ROW_NUMBER() OVER (ORDER BY COALESCE(s.SCORE, 0) DESC) AS row_num\n" +
+                        "    FROM\n" +
+                        "        ALCOHOL_TB a\n" +
+                        "    LEFT JOIN (\n" +
+                        "        SELECT\n" +
+                        "            ALCOHOL_NAME,\n" +
+                        "            ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                        "        FROM\n" +
+                        "            SCORE_TB\n" +
+                        "        GROUP BY\n" +
+                        "            ALCOHOL_NAME\n" +
+                        "    ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                        "    LEFT JOIN (\n" +
+                        "        SELECT\n" +
+                        "            USER_ID,\n" +
+                        "            ALCOHOL_NAME,\n" +
+                        "            JJIM\n" +
+                        "        FROM\n" +
+                        "            JJIM_TB\n" +
+                        "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
+                        "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1";
+                        String endsql = "\n)\n" +
+                        "WHERE ROWNUM <= 10";
                 String orderByClause = "";
                 if (sortBy != null && !sortBy.isEmpty()) {
                     switch (sortBy) {
@@ -53,7 +78,7 @@ public class AlcoholDao {
                             orderByClause = "";
                     }
                 }
-                String sql = basesql + orderByClause;
+                String sql = basesql + orderByClause + endsql;
                 pStmt = conn.prepareStatement(sql);
             } else {
                 String basesql = "WITH RankedReviews AS (\n" +
@@ -72,10 +97,30 @@ public class AlcoholDao {
                         "    a.ABV,\n" +
                         "    a.VOLUME,\n" +
                         "    a.PRICE,\n" +
-                        "    r.REVIEW\n" +
+                        "    r.REVIEW,\n" +
+                        "    s.SCORE,\n" +
+                        "    j.USER_ID AS JJIM_USER_ID,\n" +
+                        "    j.JJIM\n" +
                         "FROM\n" +
                         "    ALCOHOL_TB a\n" +
-                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                        "LEFT JOIN (\n" +
+                        "    SELECT\n" +
+                        "        ALCOHOL_NAME,\n" +
+                        "        ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                        "    FROM\n" +
+                        "        SCORE_TB\n" +
+                        "    GROUP BY\n" +
+                        "        ALCOHOL_NAME\n" +
+                        ") s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                        "LEFT JOIN (\n" +
+                        "    SELECT\n" +
+                        "        USER_ID,\n" +
+                        "        ALCOHOL_NAME,\n" +
+                        "        JJIM\n" +
+                        "    FROM\n" +
+                        "        JJIM_TB\n" +
+                        ") j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
+                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1" +
                         "WHERE\n" +
                         "    a.CATEGORY = ?";
                 String orderByClause = "";
@@ -108,6 +153,9 @@ public class AlcoholDao {
                 vo.setVolume(rs.getInt("VOLUME"));
                 vo.setPrice(rs.getInt("PRICE"));
                 vo.setReview(rs.getString("REVIEW"));
+                vo.setScore(rs.getFloat("SCORE"));
+                vo.setJjim_user_id(rs.getString("JJIM_USER_ID"));
+                vo.setJjim(rs.getBoolean("JJIM"));
                 list.add(vo);
             }
           } catch (Exception e) {

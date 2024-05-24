@@ -14,7 +14,7 @@ public class SearchDao {
     private Connection conn = null;
     private PreparedStatement pStmt = null;
     private ResultSet rs = null;
-
+    //사용함.
     public List<AlcoholTotalDto> alcoholSearch(String category,String keyword) throws SQLException {
         List<AlcoholTotalDto> search = new ArrayList<>();
         try{
@@ -29,18 +29,59 @@ public class SearchDao {
                     "    FROM\n" +
                     "        REVIEW_TB\n" +
                     ")\n" +
-                    "SELECT\n" +
-                    "    a.ALCOHOL_NAME,\n" +
-                    "    a.COUNTRY_OF_ORIGIN,\n" +
-                    "    a.COM,\n" +
-                    "    a.ABV,\n" +
-                    "    a.VOLUME,\n" +
-                    "    a.PRICE,\n" +
-                    "    r.REVIEW\n" +
-                    "FROM\n" +
-                    "    ALCOHOL_TB a\n" +
-                    "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
-                    "WHERE a.ALCOHOL_NAME LIKE ?";
+                    "SELECT *\n" +
+                    "FROM (\n" +
+                    "    SELECT\n" +
+                    "        ALCOHOL_NAME,\n" +
+                    "        COUNTRY_OF_ORIGIN,\n" +
+                    "        COM,\n" +
+                    "        ABV,\n" +
+                    "        VOLUME,\n" +
+                    "        PRICE,\n" +
+                    "        REVIEW,\n" +
+                    "        SCORE,\n" +
+                    "        JJIM_USER_ID,\n" +
+                    "        JJIM,\n" +
+                    "        row_num\n" +
+                    "    FROM (\n" +
+                    "        SELECT\n" +
+                    "            a.ALCOHOL_NAME,\n" +
+                    "            a.COUNTRY_OF_ORIGIN,\n" +
+                    "            a.COM,\n" +
+                    "            a.ABV,\n" +
+                    "            a.VOLUME,\n" +
+                    "            a.PRICE,\n" +
+                    "            r.REVIEW,\n" +
+                    "            s.SCORE,\n" +
+                    "            j.USER_ID AS JJIM_USER_ID,\n" +
+                    "            j.JJIM,\n" +
+                    "            ROW_NUMBER() OVER (ORDER BY COALESCE(s.SCORE, 0) DESC) AS row_num\n" +
+                    "        FROM (\n" +
+                    "            SELECT *\n" +
+                    "            FROM ALCOHOL_TB\n" +
+                    "            WHERE REPLACE(LOWER(ALCOHOL_NAME), ' ', '') LIKE REPLACE(LOWER(REPLACE(?, ' ', '')), ' ', '')\n" +
+                    "        ) a\n" +
+                    "        LEFT JOIN (\n" +
+                    "            SELECT\n" +
+                    "                ALCOHOL_NAME,\n" +
+                    "                ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                    "            FROM\n" +
+                    "                SCORE_TB\n" +
+                    "            GROUP BY\n" +
+                    "                ALCOHOL_NAME\n" +
+                    "        ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                    "        LEFT JOIN (\n" +
+                    "            SELECT\n" +
+                    "                USER_ID,\n" +
+                    "                ALCOHOL_NAME,\n" +
+                    "                JJIM\n" +
+                    "            FROM\n" +
+                    "                JJIM_TB\n" +
+                    "        ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
+                    "        LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                    "    )\n" +
+                    "    WHERE ROWNUM <= 10\n" +
+                    ")";
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, "%" + keyword + "%");
         } else {
@@ -60,11 +101,31 @@ public class SearchDao {
                     "    a.ABV,\n" +
                     "    a.VOLUME,\n" +
                     "    a.PRICE,\n" +
-                    "    r.REVIEW\n" +
+                    "    r.REVIEW,\n" +
+                    "    s.SCORE,\n" +
+                    "    j.USER_ID AS JJIM_USER_ID,\n" +
+                    "    j.JJIM\n" +
                     "FROM\n" +
                     "    ALCOHOL_TB a\n" +
+                    "LEFT JOIN (\n" +
+                    "    SELECT\n" +
+                    "        ALCOHOL_NAME,\n" +
+                    "        ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                    "    FROM\n" +
+                    "        SCORE_TB\n" +
+                    "    GROUP BY\n" +
+                    "        ALCOHOL_NAME\n" +
+                    ") s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                    "LEFT JOIN (\n" +
+                    "    SELECT\n" +
+                    "        USER_ID,\n" +
+                    "        ALCOHOL_NAME,\n" +
+                    "        JJIM\n" +
+                    "    FROM\n" +
+                    "        JJIM_TB\n" +
+                    ") j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
                     "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
-                    "WHERE a.CATEGORY = ? AND a.ALCOHOL_NAME LIKE ?";
+                    "WHERE a.CATEGORY = ? AND REPLACE(LOWER(a.ALCOHOL_NAME), ' ', '') LIKE REPLACE(LOWER(REPLACE('%' || ? || '%', ' ', '')), ' ', '')";
 
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, category);
@@ -80,6 +141,9 @@ public class SearchDao {
                 vo.setVolume(rs.getInt("VOLUME"));
                 vo.setPrice(rs.getInt("PRICE"));
                 vo.setReview(rs.getString("REVIEW"));
+                vo.setScore(rs.getFloat("SCORE"));
+                vo.setJjim_user_id(rs.getString("JJIM_USER_ID"));
+                vo.setJjim(rs.getBoolean("JJIM"));
                 search.add(vo);
             }
 

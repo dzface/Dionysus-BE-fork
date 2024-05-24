@@ -108,6 +108,26 @@ public class ReviewDao {
         }
         return list;
     }
+    public boolean reviewInsert(ReviewDto dto) throws SQLException {
+        try {
+            conn = Common.getConnection();
+
+            String sql = "INSERT INTO REVIEW_TB(USER_ID, ALCOHOL_NAME,REVIEW) VALUES(?,?,?)";
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, dto.getUser_id());
+            pStmt.setString(2, dto.getAlcohol_name());
+            pStmt.setString(3, dto.getReview());
+            pStmt.executeUpdate();
+            return true;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Common.close(pStmt);
+            Common.close(conn);
+        }
+        return false;
+    }
 //    public List<ReviewDto> reviewSelect(String alcohol_name) {
 //        List<ReviewDto> list = new ArrayList<>();
 //        String sql = "SELECT USER_ID, ALCOHOL_NAME, REVIEW " +

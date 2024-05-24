@@ -15,6 +15,7 @@ public class AlcoholTotalDto {
     private int price;
     private String tag;
     private boolean jjim;
+    private String jjim_user_id;
     private String review;
-    private int score;
+    private float score;
 }

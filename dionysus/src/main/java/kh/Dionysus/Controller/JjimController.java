@@ -13,18 +13,28 @@ import java.util.List;
 @RestController
 @RequestMapping("/jjim")
 public class JjimController {
-    private final JjimDao jjimDao = new JjimDao();
-
-    @PostMapping("/toggle")
-    public ResponseEntity<String> toggleJjim(@RequestParam String userId,
-                                             @RequestParam String alcoholName,
-                                             @RequestParam boolean jjim) {
+    //사용함.
+    @PostMapping("/insertjjim")
+    public ResponseEntity<String> insertjjim(@RequestBody JjimDto dto) {
+        JjimDao jjimDao = new JjimDao();
         try {
-            jjimDao.toggleJjim(userId, alcoholName, jjim);
+            jjimDao.insertJjim(dto);
             return ResponseEntity.ok("Success");
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error occurred");
+        }
+    }
+    //사용함.
+    @PostMapping("/deletejjim")
+    public ResponseEntity<String> deleteJjim(@RequestBody JjimDto dto) throws SQLException{
+        JjimDao dao = new JjimDao();
+        boolean result = dao.deleteJjim(dto);
+        if(result){
+            return new ResponseEntity<>("Jjim deleted successfully.",HttpStatus.OK);
+        }
+        else{
+            return new ResponseEntity<>("Failed to delete jjim", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
     @GetMapping("/selectjjim")
@@ -44,4 +54,5 @@ public class JjimController {
             return new ResponseEntity<>("Failed to update jjim.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 }

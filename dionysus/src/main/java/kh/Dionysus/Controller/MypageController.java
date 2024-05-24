@@ -64,26 +64,26 @@ public class MypageController {
         List<MypageJjimDto> jjimAlcoholList = dao.jjimAlcoholSelect(jjimList);
         return new ResponseEntity<>(jjimAlcoholList, HttpStatus.OK);
     }
-    // 찜 목록의 별점
-    @PostMapping("/mypagescore")
-    public ResponseEntity<List<ScoreDto>> mypagescore(@RequestBody Map<String, String> alcoholName) {
-        JjimDao dao = new JjimDao();
-        ScoreDto dto = new ScoreDto();
-        String getAlcoholName = alcoholName.get("alcohol_name");
-        dto.setAlcohol_name(getAlcoholName);
-        List<ScoreDto> scoreList = dao.scoreSelect(getAlcoholName);
-        return new ResponseEntity<>(scoreList, HttpStatus.OK);
-    }
-    // 찜 목록의 술 리뷰
-    @PostMapping("/jjimalcoholreview")
-    public ResponseEntity<List<ReviewDto>> jjimalcoholreview(@RequestBody Map<String, String> alcoholName) {
-        JjimDao dao = new JjimDao();
-        ReviewDto dto = new ReviewDto();
-        String getAlcoholName = alcoholName.get("alcohol_name");
-        dto.setAlcohol_name(getAlcoholName);
-        List<ReviewDto> reveiwList = dao.reviewSelect(getAlcoholName);
-        return new ResponseEntity<>(reveiwList, HttpStatus.OK);
-    }
+//    // 찜 목록의 별점
+//    @PostMapping("/mypagescore")
+//    public ResponseEntity<List<ScoreDto>> mypagescore(@RequestBody Map<String, String> alcoholName) {
+//        JjimDao dao = new JjimDao();
+//        ScoreDto dto = new ScoreDto();
+//        String get_nAlcoholName = alcoholName.get("alcohol_name");
+//        dto.setAlcohol_name(getAlcoholName);
+//        List<ScoreDto> scoreList = dao.scoreSelect(getAlcoholName);
+//        return new ResponseEntity<>(scoreList, HttpStatus.OK);
+//    }
+//    // 찜 목록의 술 리뷰
+//    @PostMapping("/jjimalcoholreview")
+//    public ResponseEntity<List<ReviewDto>> jjimalcoholreview(@RequestBody Map<String, String> alcoholName) {
+//        JjimDao dao = new JjimDao();
+//        ReviewDto dto = new ReviewDto();
+//        String getAlcoholName = alcoholName.get("alcohol_name");
+//        dto.setAlcohol_name(getAlcoholName);
+//        List<ReviewDto> reveiwList = dao.reviewSelect(getAlcoholName);
+//        return new ResponseEntity<>(reveiwList, HttpStatus.OK);
+//    }
 
 
 

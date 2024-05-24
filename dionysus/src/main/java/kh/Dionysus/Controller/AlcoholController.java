@@ -13,7 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/alcohol")
 public class AlcoholController {
-    //처음에 category로 들어가면 화면에 띄워주는 리스트
+    //처음에 category로 들어가면 화면에 띄워주는 리스트 , 사용함.
     @GetMapping("/selectalcohol")
     public ResponseEntity<List<AlcoholTotalDto>> selectAlcohol(@RequestParam String category,@RequestParam String sortBy) throws SQLException {
         AlcoholDao dao = new AlcoholDao();

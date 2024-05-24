@@ -14,4 +14,6 @@ public class MypageJjimDto {
     private int volume;
     private int price;
     private boolean jjim;
+    private String review;
+    private int score;
 }

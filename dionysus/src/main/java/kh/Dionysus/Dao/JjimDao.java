@@ -1,21 +1,44 @@
 package kh.Dionysus.Dao;
 
-import kh.Dionysus.Dto.*;
+import kh.Dionysus.Dto.JjimDto;
+
+import kh.Dionysus.Dto.MypageJjimDto;
 import kh.Dionysus.Utills.Common;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JjimDao {
     private Connection conn = null;
-    private ResultSet rs = null;
     private PreparedStatement pStmt = null;
+    private ResultSet rs = null;
 
+    public void insertJjim(JjimDto dto) throws SQLException {
+        String sql = "INSERT INTO JJIM_TB (USER_ID, ALCOHOL_NAME, JJIM) VALUES (?, ?, ?) ";
+        try {
+            conn = Common.getConnection();
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, dto.getUser_id());            pStmt.setString(2, dto.getAlcohol_name());
+            pStmt.setBoolean(3,true);
+            pStmt.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Common.close(pStmt);
+            Common.close(conn);
+        }
+    }
     public List<MypageJjimDto> jjimSelect(String id) throws SQLException {
         List<MypageJjimDto> list = new ArrayList<>();
-        String sql = "SELECT USER_ID, ALCOHOL_NAME, JJIM FROM JJIM_TB WHERE USER_ID = ?";
-
+        String sql = "SELECT  M.USER_ID, j.ALCOHOL_NAME, j.JJIM " +
+                "FROM MEMBER_TB M " +
+                "JOIN JJIM_TB j ON M.USER_ID = j.USER_ID " +
+                "LEFT JOIN Alcohol_TB a ON a.ALCOHOL_NAME = j.ALCOHOL_NAME " +
+                "WHERE M.USER_ID = ?";
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
@@ -44,18 +67,16 @@ public class JjimDao {
             conn = Common.getConnection();
             for (int i = 0; i < dto.size(); i++) {
                 String sql = "SELECT M.USER_ID, A.COM, A.ALCOHOL_NAME, A.COUNTRY_OF_ORIGIN, A.ABV, A.VOLUME, A.PRICE, " +
-                        "J.JJIM " +
+                        "R.REVIEW, S.SCORE, J.JJIM " +
                         "FROM MEMBER_TB M " +
                         "JOIN JJIM_TB J ON M.USER_ID = J.USER_ID " +
                         "LEFT JOIN ALCOHOL_TB A ON A.ALCOHOL_NAME = J.ALCOHOL_NAME " +
-                        "WHERE J.ALCOHOL_NAME = ? AND J.USER_ID = ?";
-
-
+                        "LEFT JOIN REVIEW_TB R ON A.ALCOHOL_NAME = R.ALCOHOL_NAME " +
+                        "LEFT JOIN SCORE_TB S ON J.ALCOHOL_NAME = S.ALCOHOL_NAME " +
+                        "WHERE A.ALCOHOL_NAME = ?";
 
                 pStmt = conn.prepareStatement(sql);
                 pStmt.setString(1, dto.get(i).getAlcohol_name());
-                pStmt.setString(2, dto.get(i).getUser_id());
-//                pStmt.setBoolean(2, dto.get(i).isJjim());
                 rs = pStmt.executeQuery();
                 while (rs.next()) {
                     MypageJjimDto dto1 = new MypageJjimDto();
@@ -66,8 +87,8 @@ public class JjimDao {
                     dto1.setAbv(rs.getInt("ABV"));
                     dto1.setVolume(rs.getInt("VOLUME"));
                     dto1.setPrice(rs.getInt("PRICE"));
-//                    dto1.setReview(rs.getString("REVIEW"));
-//                    dto1.setScore(rs.getString("SCORE"));
+                    dto1.setReview(rs.getString("REVIEW"));
+                    dto1.setScore(rs.getInt("SCORE"));
                     dto1.setJjim(rs.getBoolean("JJIM"));
                     list.add(dto1);
                 }
@@ -81,64 +102,60 @@ public class JjimDao {
         }
         return list;
     }
-
-
-
-    public List<ScoreDto> scoreSelect(String alcohol_name) {
-        List<ScoreDto> list = new ArrayList<>();
-        String sql = "SELECT alcohol_name, ROUND(AVG(score), 1) AS average_score " +
-                "FROM SCORE_TB " +
-                "WHERE ALCOHOL_NAME = ? " +
-                "GROUP BY alcohol_name";
+    public List<JjimDto> jjimSelect2(String user_id) throws SQLException {
+        List<JjimDto> list = new ArrayList<>();
+        String sql = "SELECT * FROM JJIM_TB WHERE USER_ID = ?";
 
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, alcohol_name);
+            pStmt.setString(1, user_id);
             rs = pStmt.executeQuery();
-
             while (rs.next()) {
-                ScoreDto dto = new ScoreDto();
-                dto.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
-                dto.setScore(rs.getInt("average_score"));
-                list.add(dto);
+                JjimDto vo = new JjimDto();
+                vo.setUser_id(rs.getString("USER_ID"));
+                vo.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
+                vo.setJjim(rs.getBoolean("JJIM"));
+                list.add(vo);
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            Common.close(rs);
-            Common.close(pStmt);
-            Common.close(conn);
         }
+        Common.close(rs);
+        Common.close(pStmt);
+        Common.close(conn);
         return list;
     }
-    public List<ReviewDto> reviewSelect(String alcohol_name) {
-        List<ReviewDto> list = new ArrayList<>();
-        String sql = "SELECT USER_ID, ALCOHOL_NAME, REVIEW " +
-                "FROM REVIEW_TB " +
-                "WHERE ALCOHOL_NAME = ? ";
+
+    public boolean jjimUpdate(JjimDto dto) throws SQLException {
+        String sql = "UPDATE JJIM_TB SET JJIM = ? WHERE USER_ID = ? AND ALCOHOL_NAME = ?";
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, alcohol_name);
-            rs = pStmt.executeQuery();
-
-            while (rs.next()) {
-                ReviewDto dto = new ReviewDto();
-                dto.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
-                dto.setReview(rs.getString("REVIEW"));
-                list.add(dto);
-            }
-        } catch (SQLException e) {
+            pStmt.setBoolean(1, dto.isJjim());
+            pStmt.setString(2, dto.getUser_id());
+            pStmt.setString(3, dto.getAlcohol_name());
+            if(pStmt.executeUpdate() > 0) return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public boolean deleteJjim(JjimDto dto) throws SQLException {
+        String sql = "DELETE FROM JJIM_TB WHERE USER_ID = ? AND  ALCOHOL_NAME=?";
+        try {
+            conn = Common.getConnection();
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, dto.getUser_id());
+            pStmt.setString(2, dto.getAlcohol_name());
+            pStmt.executeUpdate();
+            return true;
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            Common.close(rs);
-            Common.close(pStmt);
             Common.close(conn);
+            Common.close(pStmt);
         }
-        return list;
+        return false;
     }
-
-
 }
-
