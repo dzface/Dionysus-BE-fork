@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class AlcoholTotalDto {
+public class AlcoholTotalDto{
     private String alcohol_name;
     private String category;
     private String country_of_origin;
@@ -18,4 +18,5 @@ public class AlcoholTotalDto {
     private String jjim_user_id;
     private String review;
     private float score;
+
 }

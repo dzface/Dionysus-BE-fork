@@ -55,13 +55,14 @@ public class AlcoholDao {
                         "        SELECT\n" +
                         "            USER_ID,\n" +
                         "            ALCOHOL_NAME,\n" +
-                        "            JJIM\n" +
+                        "            JJIM,\n" +
+                        "            ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
                         "        FROM\n" +
                         "            JJIM_TB\n" +
-                        "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
-                        "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1";
-                        String endsql = "\n)\n" +
-                        "WHERE ROWNUM <= 10";
+                        "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME AND j.rn = 1\n" +
+                        "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                        ")\n" +
+                        "WHERE row_num <= 10";
                 String orderByClause = "";
                 if (sortBy != null && !sortBy.isEmpty()) {
                     switch (sortBy) {
@@ -78,7 +79,7 @@ public class AlcoholDao {
                             orderByClause = "";
                     }
                 }
-                String sql = basesql + orderByClause + endsql;
+                String sql = basesql + orderByClause;
                 pStmt = conn.prepareStatement(sql);
             } else {
                 String basesql = "WITH RankedReviews AS (\n" +
@@ -116,11 +117,12 @@ public class AlcoholDao {
                         "    SELECT\n" +
                         "        USER_ID,\n" +
                         "        ALCOHOL_NAME,\n" +
-                        "        JJIM\n" +
+                        "        JJIM,\n" +
+                        "        ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
                         "    FROM\n" +
                         "        JJIM_TB\n" +
-                        ") j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
-                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1" +
+                        ") j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME AND j.rn = 1\n" +
+                        "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
                         "WHERE\n" +
                         "    a.CATEGORY = ?";
                 String orderByClause = "";

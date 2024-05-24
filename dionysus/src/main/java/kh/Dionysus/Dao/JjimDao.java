@@ -1,5 +1,6 @@
 package kh.Dionysus.Dao;
 
+import kh.Dionysus.Dto.AlcoholTotalDto;
 import kh.Dionysus.Dto.JjimDto;
 
 import kh.Dionysus.Dto.MypageJjimDto;
@@ -32,26 +33,151 @@ public class JjimDao {
             Common.close(conn);
         }
     }
-    public List<MypageJjimDto> jjimSelect(String id) throws SQLException {
-        List<MypageJjimDto> list = new ArrayList<>();
-        String sql = "SELECT  M.USER_ID, j.ALCOHOL_NAME, j.JJIM " +
-                "FROM MEMBER_TB M " +
-                "JOIN JJIM_TB j ON M.USER_ID = j.USER_ID " +
-                "LEFT JOIN Alcohol_TB a ON a.ALCOHOL_NAME = j.ALCOHOL_NAME " +
-                "WHERE M.USER_ID = ?";
+    public List<AlcoholTotalDto> jjimSelect(String id) throws SQLException {
+        List<AlcoholTotalDto> list = new ArrayList<>();
+        String sql = "WITH RankedReviews AS (\n" +
+                "    SELECT\n" +
+                "        USER_ID,\n" +
+                "        ALCOHOL_NAME,\n" +
+                "        REVIEW,\n" +
+                "        ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                "    FROM\n" +
+                "        REVIEW_TB\n" +
+                ")\n" +
+                "SELECT *\n" +
+                "FROM (\n" +
+                "    SELECT\n" +
+                "        a.ALCOHOL_NAME,\n" +
+                "        a.COUNTRY_OF_ORIGIN,\n" +
+                "        a.COM,\n" +
+                "        a.ABV,\n" +
+                "        a.VOLUME,\n" +
+                "        a.PRICE,\n" +
+                "        r.REVIEW,\n" +
+                "        s.SCORE,\n" +
+                "        j.USER_ID AS JJIM_USER_ID,\n" +
+                "        j.JJIM,\n" +
+                "        ROW_NUMBER() OVER (ORDER BY COALESCE(s.SCORE, 0) DESC) AS row_num\n" +
+                "    FROM\n" +
+                "        ALCOHOL_TB a\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            ALCOHOL_NAME,\n" +
+                "            ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                "        FROM\n" +
+                "            SCORE_TB\n" +
+                "        GROUP BY\n" +
+                "            ALCOHOL_NAME\n" +
+                "    ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            USER_ID,\n" +
+                "            ALCOHOL_NAME,\n" +
+                "            JJIM,\n" +
+                "            ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                "        FROM\n" +
+                "            JJIM_TB\n" +
+                "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME AND j.rn = 1\n" +
+                "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                "    WHERE j.USER_ID = ? )";
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, id);
             rs = pStmt.executeQuery();
             while (rs.next()) {
-                MypageJjimDto dto = new MypageJjimDto();
-                dto.setUser_id(rs.getString("USER_ID"));
-                dto.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
-                dto.setJjim(rs.getBoolean("JJIM"));
-                list.add(dto);
+                AlcoholTotalDto vo = new AlcoholTotalDto();
+                vo.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
+                vo.setCountry_of_origin(rs.getString("COUNTRY_OF_ORIGIN"));
+                vo.setCom(rs.getString("COM"));
+                vo.setAbv(rs.getInt("ABV"));
+                vo.setVolume(rs.getInt("VOLUME"));
+                vo.setPrice(rs.getInt("PRICE"));
+                vo.setReview(rs.getString("REVIEW"));
+                vo.setScore(rs.getFloat("SCORE"));
+                vo.setJjim_user_id(rs.getString("JJIM_USER_ID"));
+                vo.setJjim(rs.getBoolean("JJIM"));
+                list.add(vo);
             }
         } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            Common.close(rs);
+            Common.close(pStmt);
+            Common.close(conn);
+        }
+        return list;
+    }
+    public List<AlcoholTotalDto> reviewSelect(String id) throws SQLException {
+        List<AlcoholTotalDto> list = new ArrayList<>();
+        String sql = "WITH RankedReviews AS (\n" +
+                "    SELECT\n" +
+                "        USER_ID,\n" +
+                "        ALCOHOL_NAME,\n" +
+                "        REVIEW,\n" +
+                "        ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                "    FROM\n" +
+                "        REVIEW_TB\n" +
+                ")\n" +
+                "SELECT *\n" +
+                "FROM (\n" +
+                "    SELECT\n" +
+                "        a.ALCOHOL_NAME,\n" +
+                "        a.COUNTRY_OF_ORIGIN,\n" +
+                "        a.COM,\n" +
+                "        a.ABV,\n" +
+                "        a.VOLUME,\n" +
+                "        a.PRICE,\n" +
+                "        r.REVIEW,\n" +
+                "        s.SCORE,\n" +
+                "        j.USER_ID AS JJIM_USER_ID,\n" +
+                "        j.JJIM,\n" +
+                "        rr.USER_ID AS REVIEW_USER_ID,\n" +
+                "        ROW_NUMBER() OVER (ORDER BY COALESCE(s.SCORE, 0) DESC) AS row_num\n" +
+                "    FROM\n" +
+                "        ALCOHOL_TB a\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            ALCOHOL_NAME,\n" +
+                "            ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                "        FROM\n" +
+                "            SCORE_TB\n" +
+                "        GROUP BY\n" +
+                "            ALCOHOL_NAME\n" +
+                "    ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                "    LEFT JOIN (\n" +
+                "        SELECT\n" +
+                "            USER_ID,\n" +
+                "            ALCOHOL_NAME,\n" +
+                "            JJIM,\n" +
+                "            ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                "        FROM\n" +
+                "            JJIM_TB\n" +
+                "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME AND j.rn = 1\n" +
+                "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                "    LEFT JOIN REVIEW_TB rr ON a.ALCOHOL_NAME = rr.ALCOHOL_NAME\n" +
+                ")\n" +
+                "WHERE REVIEW_USER_ID = ?";
+        try {
+            conn = Common.getConnection();
+            pStmt = conn.prepareStatement(sql);
+            pStmt.setString(1, id);
+            rs = pStmt.executeQuery();
+            while (rs.next()) {
+                AlcoholTotalDto vo = new AlcoholTotalDto();
+                vo.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
+                vo.setCountry_of_origin(rs.getString("COUNTRY_OF_ORIGIN"));
+                vo.setCom(rs.getString("COM"));
+                vo.setAbv(rs.getInt("ABV"));
+                vo.setVolume(rs.getInt("VOLUME"));
+                vo.setPrice(rs.getInt("PRICE"));
+                vo.setReview(rs.getString("REVIEW"));
+                vo.setScore(rs.getFloat("SCORE"));
+                vo.setJjim_user_id(rs.getString("REVIEW_USER_ID"));
+                vo.setJjim(rs.getBoolean("JJIM"));
+                list.add(vo);
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             Common.close(rs);
@@ -141,7 +267,7 @@ public class JjimDao {
         }
         return false;
     }
-    public boolean deleteJjim(JjimDto dto) throws SQLException {
+    public void deleteJjim(JjimDto dto) throws SQLException {
         String sql = "DELETE FROM JJIM_TB WHERE USER_ID = ? AND  ALCOHOL_NAME=?";
         try {
             conn = Common.getConnection();
@@ -149,13 +275,11 @@ public class JjimDao {
             pStmt.setString(1, dto.getUser_id());
             pStmt.setString(2, dto.getAlcohol_name());
             pStmt.executeUpdate();
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             Common.close(conn);
             Common.close(pStmt);
         }
-        return false;
     }
 }

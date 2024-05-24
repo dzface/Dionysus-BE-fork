@@ -20,7 +20,7 @@ public class MypageController {
     MemberUpdateDao dao = new MemberUpdateDao();
 
     @PostMapping("/memberselect")
-    public ResponseEntity<UserDto> memberselect(@RequestBody Map<String,String> id) {
+    public ResponseEntity<UserDto> memberselect(@RequestBody Map<String, String> id) {
         System.out.println(id.get("user_id"));
         String getId = id.get("user_id");
         UserDto dto = dao.memberSelect(getId);
@@ -33,7 +33,7 @@ public class MypageController {
     // 회원 정보 수정
     @PostMapping("/memberupdate")
     public ResponseEntity<Boolean> memberUpdate(@RequestBody UserDto Dto) {
-        Boolean isTrue= dao.memberUpdate(Dto);
+        Boolean isTrue = dao.memberUpdate(Dto);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
 
@@ -45,6 +45,7 @@ public class MypageController {
         boolean isTrue = dao.MemberCheck(Dto);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
+
     // 회원 탈퇴
     @PostMapping("/memberdel")
     public ResponseEntity<Boolean> memberdel(@RequestBody UserDto Dto) {
@@ -57,38 +58,26 @@ public class MypageController {
 
 
     // 찜
-    @PostMapping("/jjimalcohol")
-    public ResponseEntity<List<MypageJjimDto>> jjimalcohol(@RequestBody MypageJjimDto Dto) throws SQLException {
+    @PostMapping("/jjimalcohollist")
+    public ResponseEntity<List<AlcoholTotalDto>> jjimalcohol(@RequestBody Map<String,String> user_id) throws SQLException {
         JjimDao dao = new JjimDao();
-        List<MypageJjimDto> jjimList = dao.jjimSelect(Dto.getUser_id());
-        List<MypageJjimDto> jjimAlcoholList = dao.jjimAlcoholSelect(jjimList);
-        return new ResponseEntity<>(jjimAlcoholList, HttpStatus.OK);
+        String get_id = user_id.get("user_id");
+        List<AlcoholTotalDto> jjimList = dao.jjimSelect(get_id);
+        return new ResponseEntity<>(jjimList, HttpStatus.OK);
     }
-//    // 찜 목록의 별점
-//    @PostMapping("/mypagescore")
-//    public ResponseEntity<List<ScoreDto>> mypagescore(@RequestBody Map<String, String> alcoholName) {
-//        JjimDao dao = new JjimDao();
-//        ScoreDto dto = new ScoreDto();
-//        String get_nAlcoholName = alcoholName.get("alcohol_name");
-//        dto.setAlcohol_name(getAlcoholName);
-//        List<ScoreDto> scoreList = dao.scoreSelect(getAlcoholName);
-//        return new ResponseEntity<>(scoreList, HttpStatus.OK);
-//    }
-//    // 찜 목록의 술 리뷰
-//    @PostMapping("/jjimalcoholreview")
-//    public ResponseEntity<List<ReviewDto>> jjimalcoholreview(@RequestBody Map<String, String> alcoholName) {
-//        JjimDao dao = new JjimDao();
-//        ReviewDto dto = new ReviewDto();
-//        String getAlcoholName = alcoholName.get("alcohol_name");
-//        dto.setAlcohol_name(getAlcoholName);
-//        List<ReviewDto> reveiwList = dao.reviewSelect(getAlcoholName);
-//        return new ResponseEntity<>(reveiwList, HttpStatus.OK);
-//    }
 
-
-
+    // 찜 목록의 술 리뷰
+    @PostMapping("/alcoholreviewlist")
+    public ResponseEntity<List<AlcoholTotalDto>> alcoholreviewlist(@RequestBody Map<String,String> user_id) throws SQLException{
+        JjimDao dao = new JjimDao();
+        String get_id = user_id.get("user_id");
+        List<AlcoholTotalDto> reviewList = dao.reviewSelect(get_id);
+        return new ResponseEntity<>(reviewList, HttpStatus.OK);
+    }
 
 }
+
+
 
 
 

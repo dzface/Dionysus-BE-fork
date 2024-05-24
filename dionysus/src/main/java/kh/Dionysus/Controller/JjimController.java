@@ -19,7 +19,7 @@ public class JjimController {
         JjimDao jjimDao = new JjimDao();
         try {
             jjimDao.insertJjim(dto);
-            return ResponseEntity.ok("Success");
+            return ResponseEntity.ok("Jjim insertd successfully");
         } catch (SQLException e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error occurred");
@@ -27,14 +27,14 @@ public class JjimController {
     }
     //사용함.
     @PostMapping("/deletejjim")
-    public ResponseEntity<String> deleteJjim(@RequestBody JjimDto dto) throws SQLException{
+    public ResponseEntity<String> deleteJjim(@RequestBody JjimDto dto){
         JjimDao dao = new JjimDao();
-        boolean result = dao.deleteJjim(dto);
-        if(result){
-            return new ResponseEntity<>("Jjim deleted successfully.",HttpStatus.OK);
+        try{
+            dao.deleteJjim(dto);
+            return ResponseEntity.ok("Jjim deleted successfully.");
         }
-        else{
-            return new ResponseEntity<>("Failed to delete jjim", HttpStatus.INTERNAL_SERVER_ERROR);
+        catch (SQLException e){
+            return ResponseEntity.ok("Failed to delete jjim");
         }
     }
     @GetMapping("/selectjjim")

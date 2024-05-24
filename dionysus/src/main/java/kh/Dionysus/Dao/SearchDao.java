@@ -29,59 +29,57 @@ public class SearchDao {
                     "    FROM\n" +
                     "        REVIEW_TB\n" +
                     ")\n" +
-                    "SELECT *\n" +
+                    "SELECT\n" +
+                    "    ALCOHOL_NAME,\n" +
+                    "    COUNTRY_OF_ORIGIN,\n" +
+                    "    COM,\n" +
+                    "    ABV,\n" +
+                    "    VOLUME,\n" +
+                    "    PRICE,\n" +
+                    "    REVIEW,\n" +
+                    "    SCORE,\n" +
+                    "    JJIM_USER_ID,\n" +
+                    "    JJIM,\n" +
+                    "    row_num\n" +
                     "FROM (\n" +
                     "    SELECT\n" +
-                    "        ALCOHOL_NAME,\n" +
-                    "        COUNTRY_OF_ORIGIN,\n" +
-                    "        COM,\n" +
-                    "        ABV,\n" +
-                    "        VOLUME,\n" +
-                    "        PRICE,\n" +
-                    "        REVIEW,\n" +
-                    "        SCORE,\n" +
-                    "        JJIM_USER_ID,\n" +
-                    "        JJIM,\n" +
-                    "        row_num\n" +
+                    "        a.ALCOHOL_NAME,\n" +
+                    "        a.COUNTRY_OF_ORIGIN,\n" +
+                    "        a.COM,\n" +
+                    "        a.ABV,\n" +
+                    "        a.VOLUME,\n" +
+                    "        a.PRICE,\n" +
+                    "        r.REVIEW,\n" +
+                    "        s.SCORE,\n" +
+                    "        j.USER_ID AS JJIM_USER_ID,\n" +
+                    "        j.JJIM,\n" +
+                    "        ROW_NUMBER() OVER (ORDER BY COALESCE(s.SCORE, 0) DESC) AS row_num\n" +
                     "    FROM (\n" +
+                    "        SELECT *\n" +
+                    "        FROM ALCOHOL_TB\n" +
+                    "        WHERE REPLACE(LOWER(ALCOHOL_NAME), ' ', '') LIKE REPLACE(LOWER(REPLACE(?, ' ', '')), ' ', '')\n" +
+                    "    ) a\n" +
+                    "    LEFT JOIN (\n" +
                     "        SELECT\n" +
-                    "            a.ALCOHOL_NAME,\n" +
-                    "            a.COUNTRY_OF_ORIGIN,\n" +
-                    "            a.COM,\n" +
-                    "            a.ABV,\n" +
-                    "            a.VOLUME,\n" +
-                    "            a.PRICE,\n" +
-                    "            r.REVIEW,\n" +
-                    "            s.SCORE,\n" +
-                    "            j.USER_ID AS JJIM_USER_ID,\n" +
-                    "            j.JJIM,\n" +
-                    "            ROW_NUMBER() OVER (ORDER BY COALESCE(s.SCORE, 0) DESC) AS row_num\n" +
-                    "        FROM (\n" +
-                    "            SELECT *\n" +
-                    "            FROM ALCOHOL_TB\n" +
-                    "            WHERE REPLACE(LOWER(ALCOHOL_NAME), ' ', '') LIKE REPLACE(LOWER(REPLACE(?, ' ', '')), ' ', '')\n" +
-                    "        ) a\n" +
-                    "        LEFT JOIN (\n" +
-                    "            SELECT\n" +
-                    "                ALCOHOL_NAME,\n" +
-                    "                ROUND(AVG(SCORE), 1) AS SCORE\n" +
-                    "            FROM\n" +
-                    "                SCORE_TB\n" +
-                    "            GROUP BY\n" +
-                    "                ALCOHOL_NAME\n" +
-                    "        ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
-                    "        LEFT JOIN (\n" +
-                    "            SELECT\n" +
-                    "                USER_ID,\n" +
-                    "                ALCOHOL_NAME,\n" +
-                    "                JJIM\n" +
-                    "            FROM\n" +
-                    "                JJIM_TB\n" +
-                    "        ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
-                    "        LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
-                    "    )\n" +
-                    "    WHERE ROWNUM <= 10\n" +
-                    ")";
+                    "            ALCOHOL_NAME,\n" +
+                    "            ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                    "        FROM\n" +
+                    "            SCORE_TB\n" +
+                    "        GROUP BY\n" +
+                    "            ALCOHOL_NAME\n" +
+                    "    ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                    "    LEFT JOIN (\n" +
+                    "        SELECT\n" +
+                    "            USER_ID,\n" +
+                    "            ALCOHOL_NAME,\n" +
+                    "            JJIM,\n" +
+                    "            ROW_NUMBER() OVER (PARTITION BY ALCOHOL_NAME ORDER BY USER_ID) AS rn\n" +
+                    "        FROM\n" +
+                    "            JJIM_TB\n" +
+                    "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME AND j.rn = 1\n" +
+                    "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                    ")\n" +
+                    "WHERE ROWNUM <= 10";
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, "%" + keyword + "%");
         } else {
@@ -95,37 +93,53 @@ public class SearchDao {
                     "        REVIEW_TB\n" +
                     ")\n" +
                     "SELECT\n" +
-                    "    a.ALCOHOL_NAME,\n" +
-                    "    a.COUNTRY_OF_ORIGIN,\n" +
-                    "    a.COM,\n" +
-                    "    a.ABV,\n" +
-                    "    a.VOLUME,\n" +
-                    "    a.PRICE,\n" +
-                    "    r.REVIEW,\n" +
-                    "    s.SCORE,\n" +
-                    "    j.USER_ID AS JJIM_USER_ID,\n" +
-                    "    j.JJIM\n" +
-                    "FROM\n" +
-                    "    ALCOHOL_TB a\n" +
-                    "LEFT JOIN (\n" +
+                    "    ALCOHOL_NAME,\n" +
+                    "    COUNTRY_OF_ORIGIN,\n" +
+                    "    COM,\n" +
+                    "    ABV,\n" +
+                    "    VOLUME,\n" +
+                    "    PRICE,\n" +
+                    "    REVIEW,\n" +
+                    "    SCORE,\n" +
+                    "    JJIM_USER_ID,\n" +
+                    "    JJIM\n" +
+                    "FROM (\n" +
                     "    SELECT\n" +
-                    "        ALCOHOL_NAME,\n" +
-                    "        ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                    "        a.ALCOHOL_NAME,\n" +
+                    "        a.COUNTRY_OF_ORIGIN,\n" +
+                    "        a.COM,\n" +
+                    "        a.ABV,\n" +
+                    "        a.VOLUME,\n" +
+                    "        a.PRICE,\n" +
+                    "        r.REVIEW,\n" +
+                    "        s.SCORE,\n" +
+                    "        j.USER_ID AS JJIM_USER_ID,\n" +
+                    "        j.JJIM,\n" +
+                    "        ROW_NUMBER() OVER (PARTITION BY a.ALCOHOL_NAME ORDER BY j.USER_ID) AS row_num\n" +
                     "    FROM\n" +
-                    "        SCORE_TB\n" +
-                    "    GROUP BY\n" +
-                    "        ALCOHOL_NAME\n" +
-                    ") s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
-                    "LEFT JOIN (\n" +
-                    "    SELECT\n" +
-                    "        USER_ID,\n" +
-                    "        ALCOHOL_NAME,\n" +
-                    "        JJIM\n" +
-                    "    FROM\n" +
-                    "        JJIM_TB\n" +
-                    ") j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
-                    "LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
-                    "WHERE a.CATEGORY = ? AND REPLACE(LOWER(a.ALCOHOL_NAME), ' ', '') LIKE REPLACE(LOWER(REPLACE('%' || ? || '%', ' ', '')), ' ', '')";
+                    "        ALCOHOL_TB a\n" +
+                    "    LEFT JOIN (\n" +
+                    "        SELECT\n" +
+                    "            ALCOHOL_NAME,\n" +
+                    "            ROUND(AVG(SCORE), 1) AS SCORE\n" +
+                    "        FROM\n" +
+                    "            SCORE_TB\n" +
+                    "        GROUP BY\n" +
+                    "            ALCOHOL_NAME\n" +
+                    "    ) s ON a.ALCOHOL_NAME = s.ALCOHOL_NAME\n" +
+                    "    LEFT JOIN (\n" +
+                    "        SELECT\n" +
+                    "            USER_ID,\n" +
+                    "            ALCOHOL_NAME,\n" +
+                    "            JJIM\n" +
+                    "        FROM\n" +
+                    "            JJIM_TB\n" +
+                    "    ) j ON a.ALCOHOL_NAME = j.ALCOHOL_NAME\n" +
+                    "    LEFT JOIN RankedReviews r ON a.ALCOHOL_NAME = r.ALCOHOL_NAME AND r.rn = 1\n" +
+                    "    WHERE a.CATEGORY = ? \n" +
+                    "    AND REPLACE(LOWER(a.ALCOHOL_NAME), ' ', '') LIKE REPLACE(LOWER(REPLACE('%' || ? || '%', ' ', '')), ' ', '')\n" +
+                    ")\n" +
+                    "WHERE row_num = 1";
 
             pStmt = conn.prepareStatement(sql);
             pStmt.setString(1, category);
