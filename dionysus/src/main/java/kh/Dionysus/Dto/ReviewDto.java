@@ -10,4 +10,5 @@ public class ReviewDto {
     private String user_id;
     private String alcohol_name;
     private String review;
+    private String user_nick;
 }

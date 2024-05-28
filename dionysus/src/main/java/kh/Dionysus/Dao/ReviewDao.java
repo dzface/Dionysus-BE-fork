@@ -11,20 +11,23 @@ public class ReviewDao {
     private Connection conn = null;
     private ResultSet rs = null;
     private PreparedStatement pStmt = null;
-    MypageReviewDto dto = new MypageReviewDto();
-    public List<MypageReviewDto> reviewSelect(String id) throws SQLException {
-        List<MypageReviewDto> list = new ArrayList<>();
-        String sql = "SELECT USER_ID, ALCOHOL_NAME, REVIEW FROM REVIEW_TB WHERE USER_ID = ?";
+    public List<ReviewDto> reviewSelect(String ALCOHOL_NAME) throws SQLException {
+        List<ReviewDto> list = new ArrayList<>();
+        String sql = "SELECT REVIEW_TB.USER_ID, REVIEW_TB.ALCOHOL_NAME, REVIEW_TB.REVIEW, MEMBER_TB.USER_NICK\n" +
+                "FROM REVIEW_TB\n" +
+                "JOIN MEMBER_TB ON REVIEW_TB.USER_ID = MEMBER_TB.USER_ID\n" +
+                "WHERE REVIEW_TB.ALCOHOL_NAME = ?";
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, id);
+            pStmt.setString(1, ALCOHOL_NAME);
             rs = pStmt.executeQuery();
             while (rs.next()) {
-                MypageReviewDto dto = new MypageReviewDto();
+                ReviewDto dto = new ReviewDto();
                 dto.setUser_id(rs.getString("USER_ID"));
                 dto.setAlcohol_name(rs.getString("ALCOHOL_NAME"));
                 dto.setReview(rs.getString("REVIEW"));
+                dto.setUser_nick(rs.getString("USER_NICK"));
                 list.add(dto);
             }
         } catch (Exception e) {
