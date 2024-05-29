@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://kh-dionysus.kro.kr:3000")
 @RestController
 @RequestMapping("/traditional")
 public class TraditionalController {

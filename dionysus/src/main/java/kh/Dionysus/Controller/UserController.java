@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = "http://kh-dionysus.kro.kr:3000")
 @RestController
 @RequestMapping("/users")
 @Slf4j //롬복내장 디버깅 어노테이션
