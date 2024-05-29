@@ -63,21 +63,21 @@ public class UserController {
     }
     // GET : 이름 주민번호 받아서 아이디 조회
     @GetMapping("/findid")
-    public ResponseEntity<String> memberList(@RequestParam String name, @RequestParam String jumin) {
-        System.out.println("NAME : " + name);
-        System.out.println("JUMIN : " + jumin);
+    public ResponseEntity<String> memberList(@RequestParam String user_name, @RequestParam String user_jumin) {
+        System.out.println("NAME : " + user_name);
+        System.out.println("JUMIN : " + user_jumin);
         UserDAO dao = new UserDAO();
-        String id = dao.findIDMethod(name, jumin);
+        String id = dao.findIDMethod(user_name, user_jumin);
         return new ResponseEntity<>(id, HttpStatus.OK);
     }
     // GET : 아이디 이름 주민번호 받아서 비밀번호
     @GetMapping("/findpw")
-    public ResponseEntity<String> memberList(@RequestParam String id, @RequestParam String name, @RequestParam String jumin) {
-        System.out.println("ID : " + id);
-        System.out.println("NAME : " + name);
-        System.out.println("JUMIN : " + jumin);
+    public ResponseEntity<String> memberList(@RequestParam String user_id, @RequestParam String user_name, @RequestParam String user_jumin) {
+        System.out.println("ID : " + user_id);
+        System.out.println("NAME : " + user_name);
+        System.out.println("JUMIN : " + user_jumin);
         UserDAO dao = new UserDAO();
-        String pw= dao.findPWMethod(id, name, jumin);
+        String pw= dao.findPWMethod(user_id, user_name, user_jumin);
         return new ResponseEntity<>(pw, HttpStatus.OK);
     }
     // POST : 회원 가입
@@ -97,5 +97,6 @@ public class UserController {
         boolean isTrue = dao.userDeleteMethod(getId);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
+
 
 }

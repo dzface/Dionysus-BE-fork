@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.util.List;
-
+@CrossOrigin(origins = "http://localhost:3000")
+@RestController
+@RequestMapping("/wine")
 public class WineController {
-    @CrossOrigin(origins = "http://localhost:3000")
-    @RestController
-    @RequestMapping("/wine")
+
     public class BeerController {
         @GetMapping("/selectwine")
         public ResponseEntity<List<AlcoholTotalDto>> selectBeer(@RequestParam String name) throws SQLException {
