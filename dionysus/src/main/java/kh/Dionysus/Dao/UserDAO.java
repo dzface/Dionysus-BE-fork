@@ -177,16 +177,16 @@ public class UserDAO {
         return loginResult;
     }
     //아이디 찾기
-    public String findIDMethod(String getName, String getJumin) {
+    public String findIDMethod(String getUser_name, String getUser_jumin) {
         String sql = "SELECT USER_ID FROM MEMBER_TB WHERE USER_NAME = ? AND USER_JUMIN=?";
         String user_id = null;
-        System.out.println("NAME : " + getName);
-        System.out.println("JUMIN : " + getJumin);
+        System.out.println("NAME : " + getUser_name);
+        System.out.println("JUMIN : " + getUser_jumin);
         try {
             conn = Common.getConnection();
             pStmt = conn.prepareStatement(sql);
-            pStmt.setString(1, getName);
-            pStmt.setString(2, getJumin);
+            pStmt.setString(1, getUser_name);
+            pStmt.setString(2, getUser_jumin);
             rs = pStmt.executeQuery();
             while(rs.next()) {
                 user_id = rs.getString("USER_ID");
