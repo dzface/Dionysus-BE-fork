@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
 import java.util.List;
 
-@CrossOrigin(origins = "http://kh-dionysus.kro.kr:3000")
+@CrossOrigin(origins = "http://gool-man.kro.kr:3000")
 @RestController
 @RequestMapping("/jjim")
 public class JjimController {

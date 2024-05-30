@@ -13,7 +13,7 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
-@CrossOrigin(origins = "http://kh-dionysus.kro.kr:3000")
+@CrossOrigin(origins = "http://gool-man.kro.kr:3000")
 @RestController
 @RequestMapping("/mypage")
 public class MypageController {
