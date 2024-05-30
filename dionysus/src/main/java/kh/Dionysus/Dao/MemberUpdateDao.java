@@ -41,7 +41,6 @@ public class MemberUpdateDao {
         }
         return dto;
     }
-
     // 회원 정보 수정
     public Boolean memberUpdate(UserDto dto) {
         int result = 0;
@@ -68,7 +67,4 @@ public class MemberUpdateDao {
         if(result == 1) return true;
         else return false;
     }
-
-
-
 }
