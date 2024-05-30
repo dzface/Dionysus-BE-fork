@@ -43,16 +43,4 @@ public class JjimController {
         List<JjimDto> jjimList = dao.jjimSelect2(user_id);
         return new ResponseEntity<>(jjimList, HttpStatus.OK);
     }
-
-    @PostMapping("/updatejjim")
-    public ResponseEntity<String> updateJjim(@RequestBody JjimDto dto) throws SQLException {
-        JjimDao dao = new JjimDao();
-        boolean result = dao.jjimUpdate(dto);
-        if (result) {
-            return new ResponseEntity<>("Jjim updated successfully.", HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>("Failed to update jjim.", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
 }

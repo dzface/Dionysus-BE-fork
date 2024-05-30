@@ -30,26 +30,4 @@ public class ReviewController {
             return new ResponseEntity<>("Failed to insert review.", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-//
-//    @PutMapping("/updatereview")
-//    public ResponseEntity<String> updateReview(@RequestBody ReviewDto dto) throws SQLException {
-//        ReviewDao dao = new ReviewDao();
-//        boolean result = dao.reviewUpdate(dto);
-//        if (result) {
-//            return new ResponseEntity<>("Review updated successfully.", HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>("Failed to update review.", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
-//
-//    @DeleteMapping("/deletereview")
-//    public ResponseEntity<String> deleteReview(@RequestParam String user_id, @RequestParam String alcohol_name) throws SQLException {
-//        ReviewDao dao = new ReviewDao();
-//        boolean result = dao.reviewDelete(user_id, alcohol_name);
-//        if (result) {
-//            return new ResponseEntity<>("Review deleted successfully.", HttpStatus.OK);
-//        } else {
-//            return new ResponseEntity<>("Failed to delete review.", HttpStatus.INTERNAL_SERVER_ERROR);
-//        }
-//    }
 }

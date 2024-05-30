@@ -1,6 +1,6 @@
 package kh.Dionysus.Controller;
 
-import kh.Dionysus.Dao.UserDAO;
+import kh.Dionysus.Dao.UserDao;
 import kh.Dionysus.Dto.UserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,7 @@ public class UserController {
     @GetMapping("/search-user")
     public ResponseEntity<List<UserDto>> memberList(@RequestParam String name) {
         System.out.println("NAME : " + name);
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         List<UserDto> list = dao.memberSelect(name);
         return new ResponseEntity<>(list, HttpStatus.OK);
     }
@@ -35,7 +35,7 @@ public class UserController {
         String pw = loginData.get("USER_PW");
         System.out.println("INPUT_ID : " + id);
         System.out.println("INPUT_PW : " + pw);
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         List<UserDto> result = dao.loginUserCheck(id, pw);
 
         // 디버깅: 결과 확인
@@ -50,14 +50,14 @@ public class UserController {
     @GetMapping("/check")
     public ResponseEntity<Boolean> memberCheck(@RequestParam String USER_ID) {
         System.out.println("회원 가입 여부 확인 ID : " + USER_ID);
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         boolean isTrue = dao.regMemberCheck(USER_ID);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
     @GetMapping("/jumin-check")
     public ResponseEntity<Boolean> juminCheck(@RequestParam String USER_JUMIN) {
         System.out.println("주민번호 확인로그 : " + USER_JUMIN);
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         boolean isTrue = dao.juminCheck(USER_JUMIN);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
@@ -66,7 +66,7 @@ public class UserController {
     public ResponseEntity<String> memberList(@RequestParam String user_name, @RequestParam String user_jumin) {
         System.out.println("NAME : " + user_name);
         System.out.println("JUMIN : " + user_jumin);
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         String id = dao.findIDMethod(user_name, user_jumin);
         return new ResponseEntity<>(id, HttpStatus.OK);
     }
@@ -76,7 +76,7 @@ public class UserController {
         System.out.println("ID : " + user_id);
         System.out.println("NAME : " + user_name);
         System.out.println("JUMIN : " + user_jumin);
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         String pw= dao.findPWMethod(user_id, user_name, user_jumin);
         return new ResponseEntity<>(pw, HttpStatus.OK);
     }
@@ -84,7 +84,7 @@ public class UserController {
     @PostMapping("/signup")
     public ResponseEntity<Boolean> userRegister(@RequestBody UserDto GenerateUser) {
 
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         boolean isTrue = dao.userRegister(GenerateUser);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }
@@ -93,7 +93,7 @@ public class UserController {
     @PostMapping("/delete-user")
     public ResponseEntity<Boolean> userDeleteMethod(@RequestBody Map<String, String> delUser) {
         String getId = delUser.get("id");
-        UserDAO dao = new UserDAO();
+        UserDao dao = new UserDao();
         boolean isTrue = dao.userDeleteMethod(getId);
         return new ResponseEntity<>(isTrue, HttpStatus.OK);
     }

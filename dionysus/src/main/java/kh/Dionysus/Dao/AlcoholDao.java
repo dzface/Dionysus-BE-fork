@@ -9,7 +9,6 @@ import java.util.List;
 
 public class AlcoholDao {
     private Connection conn = null;
-    private Statement stmt = null;
     private ResultSet rs = null;
     private PreparedStatement pStmt = null;
     public List<AlcoholTotalDto> alcoholSelect2(String category,String sortBy) throws SQLException {
